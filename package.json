@@ -1,0 +1,24 @@
+{
+  "name": "kempo-shipping",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Coming soon: shipping zones, rates and labels, so an order for something physical can be priced to its address and sent.",
+  "license": "MIT",
+  "author": "Dustin Poissant",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  },
+  "files": [
+    "admin",
+    "kempo-config.json"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dustinpoissant/kempo-shipping.git"
+  },
+  "peerDependencies": {
+    "kempo": ">=4.7.0",
+    "kempo-ui": ">=0.5.2"
+  }
+}
