@@ -1,6 +1,6 @@
 {
   "name": "kempo-shipping",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Shipping for kempo-commerce: a shipping address at checkout, boxes and packing, a flat rate or prices from carrier extensions (kempo-shipping-easypost, -shippo, -usps, -ups), a choice of carrier and service for the customer, and a Shipping tab on the order.",
   "license": "MIT",
   "author": "Dustin Poissant",
