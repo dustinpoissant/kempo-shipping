@@ -1,4 +1,148 @@
 {
   "docs": "https://github.com/dustinpoissant/kempo-shipping#readme",
-  "git": "https://github.com/dustinpoissant/kempo-shipping"
+  "git": "https://github.com/dustinpoissant/kempo-shipping",
+  "public-scope": "shipping",
+  "schema": "./server/db/schema.js",
+  "dependencies": [
+    "kempo-commerce",
+    "kempo-products"
+  ],
+  "hooks": {
+    "kempo-commerce:totals:fees": "./hooks/totals-fees.js",
+    "kempo-commerce:checkout:validate": "./hooks/checkout-validate.js",
+    "kempo-commerce:checkout:before_place": "./hooks/checkout-before-place.js"
+  },
+  "settings": [
+    {
+      "name": "shipping_flat_rate",
+      "value": "0",
+      "type": "number",
+      "description": "The flat shipping charge for an order that needs sending, in the smallest unit of the currency (500 is 5.00). 0 is free shipping. A product can set its own charge"
+    },
+    {
+      "name": "flat_rate_enabled",
+      "value": "true",
+      "type": "boolean",
+      "description": "Whether an order that boxes and carriers cannot price pays the flat rate. When off, such an order cannot be placed"
+    },
+    {
+      "name": "shipping_countries",
+      "value": "",
+      "type": "string",
+      "description": "The countries physical items ship to, as two-letter codes separated by commas. Blank ships nowhere"
+    },
+    {
+      "name": "weight_unit",
+      "value": "lb",
+      "type": "string",
+      "description": "The unit product weights are measured in: oz, lb, g or kg"
+    },
+    {
+      "name": "dimension_unit",
+      "value": "in",
+      "type": "string",
+      "description": "The unit product lengths, widths and heights are measured in: in or cm"
+    },
+    {
+      "name": "processing_count_weekends",
+      "value": "false",
+      "type": "boolean",
+      "description": "Whether weekends count towards processing days (the days it takes to make a product and get it ready to ship)"
+    },
+    {
+      "name": "processing_cutoff",
+      "value": "17:00",
+      "type": "string",
+      "description": "The time of day (HH:MM, 24 hour) after which today no longer counts towards processing days. Blank for none"
+    },
+    {
+      "name": "processing_timezone",
+      "value": "America/New_York",
+      "type": "string",
+      "description": "The time zone the order cutoff time is in"
+    },
+    {
+      "name": "combine_items",
+      "value": "false",
+      "type": "boolean",
+      "description": "Whether items in an order are put into one box where they fit, instead of one box each"
+    },
+    {
+      "name": "origin_name",
+      "value": "",
+      "type": "string",
+      "description": "The name or business orders are sent from, which carriers need to quote a rate"
+    },
+    {
+      "name": "origin_phone",
+      "value": "",
+      "type": "string",
+      "description": "The phone number orders are sent from"
+    },
+    {
+      "name": "origin_line1",
+      "value": "",
+      "type": "string",
+      "description": "The street address orders are sent from"
+    },
+    {
+      "name": "origin_line2",
+      "value": "",
+      "type": "string",
+      "description": "The apartment, suite or unit orders are sent from"
+    },
+    {
+      "name": "origin_city",
+      "value": "",
+      "type": "string",
+      "description": "The city orders are sent from"
+    },
+    {
+      "name": "origin_state",
+      "value": "",
+      "type": "string",
+      "description": "The state or region orders are sent from"
+    },
+    {
+      "name": "origin_postal_code",
+      "value": "",
+      "type": "string",
+      "description": "The postal code orders are sent from"
+    },
+    {
+      "name": "origin_country",
+      "value": "",
+      "type": "string",
+      "description": "The country orders are sent from, as a two-letter code"
+    }
+  ],
+  "permissions": [
+    {
+      "name": "shipping:view",
+      "description": "See the shipping settings: the flat rate and the countries shipped to"
+    },
+    {
+      "name": "shipping:manage",
+      "description": "Change the shipping settings"
+    }
+  ],
+  "groups": [
+    {
+      "name": "kempo-shipping:viewer",
+      "description": "Can see the shipping settings, but not change them",
+      "permissions": [
+        "system:admin:access",
+        "shipping:view"
+      ]
+    },
+    {
+      "name": "kempo-shipping:manager",
+      "description": "Can change the shipping settings",
+      "permissions": [
+        "system:admin:access",
+        "shipping:view",
+        "shipping:manage"
+      ]
+    }
+  ]
 }

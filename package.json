@@ -1,8 +1,7 @@
 {
   "name": "kempo-shipping",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Coming soon: shipping zones, rates and labels, so an order for something physical can be priced to its address and sent.",
+  "version": "0.1.0",
+  "description": "Shipping for kempo-commerce: a shipping address at checkout, boxes and packing, a flat rate or prices from carrier extensions (kempo-shipping-easypost, -shippo, -usps, -ups), a choice of carrier and service for the customer, and a Shipping tab on the order.",
   "license": "MIT",
   "author": "Dustin Poissant",
   "type": "module",
@@ -11,14 +10,31 @@
   },
   "files": [
     "admin",
+    "hooks",
+    "public",
+    "server",
+    "install.js",
+    "update.js",
+    "sdk.js",
     "kempo-config.json"
   ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/dustinpoissant/kempo-shipping.git"
   },
+  "dependencies": {
+    "drizzle-orm": "^0.45.2"
+  },
   "peerDependencies": {
     "kempo": ">=4.7.0",
-    "kempo-ui": ">=0.5.2"
+    "kempo-commerce": ">=0.1.0",
+    "kempo-products": ">=0.3.0",
+    "kempo-ui": ">=0.6.0"
+  },
+  "main": "sdk.js",
+  "exports": {
+    "./install": "./install.js",
+    "./update": "./update.js",
+    "./sdk": "./sdk.js"
   }
 }

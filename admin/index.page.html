@@ -3,8 +3,12 @@ locked: true
 -->
 <page title="Shipping - Admin">
 <content>
+  <script type="module" src="/admin/extension/kempo-shipping/components/ShippingSettings.js"></script>
   <h1>Shipping</h1>
-  <p class="large">Shipping is coming soon.</p>
-  <p class="tc-muted">Shipping zones, rates and labels, so an order for something physical can be priced to its address and sent.</p>
+  <k-shipping-settings>
+    <location name="shipping-admin-tabs" />
+    <location name="shipping-admin-country-actions" />
+  </k-shipping-settings>
+  <location name="shipping-admin-scripts" />
 </content>
 </page>
