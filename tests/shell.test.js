@@ -32,8 +32,8 @@ test('the icon is a single filled path that k-icon can recolour', async () => {
   assert.doesNotMatch(svg, /stroke=/);
 });
 
-test('it stays private until it is released', async () => {
+test('it ships the files it lists', async () => {
   const pkg = JSON.parse(await read('package.json'));
-  assert.equal(pkg.private, true);
+  assert.equal(pkg.private, undefined);
   assert.deepEqual(pkg.files, ['admin', 'hooks', 'public', 'server', 'install.js', 'update.js', 'sdk.js', 'kempo-config.json']);
 });
