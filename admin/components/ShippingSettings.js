@@ -10,13 +10,13 @@ import '/admin/extension/kempo-shipping/components/Boxes.js';
 import { countryOptions } from '/commerce/utils/regions.js';
 
 /*
-  The shipping settings screen, served at /admin/extension/kempo-shipping/components/ShippingSettings.js, in tabs:
+  The shipping settings, served at /admin/extension/kempo-shipping/components/ShippingSettings.js, in tabs:
   General (the flat rate, the countries physical items ship to, how processing time is counted, and the address orders are
   sent from, which carriers need to quote a rate), Boxes (see Boxes.js) and Units. A product sets its own flat charge, weight and size in the Shipping tab
   of its product form.
 
   The saved Ship From address is a public property, `origin`, and an `origin-change` event fires on this element when it
-  loads and when it is saved. A carrier tab reads and listens to it (it finds this screen with closest()) to keep its Test
+  loads and when it is saved. A carrier tab reads and listens to it (it finds this component with closest()) to keep its Test
   button off until the address it needs is filled in.
 
   A carrier extension adds a tab by filling the `shipping-admin-tabs` location with an element that names the tab:
@@ -24,7 +24,7 @@ import { countryOptions } from '/commerce/utils/regions.js';
     <k-shipping-tab name="table" label="Table Rates"> ...anything... </k-shipping-tab>
 
   It can also add a button under the countries by filling `shipping-admin-country-actions` with an element that names
-  its own slot. It finds this screen with closest() and calls `addCountries(['MX', 'CA'])`:
+  its own slot. It finds this component with closest() and calls `addCountries(['MX', 'CA'])`:
 
     <k-ups-country-button slot="country-actions"></k-ups-country-button>
 */
@@ -263,12 +263,18 @@ export class ShippingSettings extends ShadowComponent {
     `;
   }
 
+  // The tab event stays inside this component's shadow root, so each carrier tab is told when it is opened.
+  showTab = ({ detail }) => {
+    const $tab = [...this.querySelectorAll(':scope > k-shipping-tab')].find($element => $element.getAttribute('name') === detail.tab);
+    $tab?.dispatchEvent(new CustomEvent('shown'));
+  };
+
   render(){
     if(this.loading) return html`<k-spinner></k-spinner>`;
     return html`
       ${this.error ? html`<p class="tc-danger" role="alert">${this.error}</p>` : nothing}
 
-      <k-tabs class="mb">
+      <k-tabs class="mb" @tab=${this.showTab}>
         <k-tab for="general">General</k-tab>
         <k-tab for="boxes">Boxes</k-tab>
         <k-tab for="units">Units</k-tab>

@@ -15,7 +15,7 @@ import Toast from '/kempo-ui/components/Toast.js';
   every weight). A box with no price is priced by a carrier extension (USPS, UPS, FedEx) instead. An order is packed into the
   smallest box it fits. Boxes a carrier extension registered are listed below, and can be turned on or off. A toggle puts
   several items in one box where they fit. Sizes are in the units on the Units tab and prices in the store's currency; the
-  screen shows whole currency units and stores the smallest.
+  form shows whole currency units and stores the smallest.
 */
 const TAG = 'k-shipping-boxes';
 
@@ -51,7 +51,12 @@ export class Boxes extends ShadowComponent {
 
   connectedCallback(){
     super.connectedCallback();
-    this.load();
+const pane = this.closest('k-tab-content');
+    // Loads when its tab is first opened, so a tab nobody opens makes no requests.
+    if(!pane || pane.active) this.load();
+    else this.closest('k-tabs')?.addEventListener('tabfirstshown', ({ detail }) => {
+      if(detail.tab === pane.name) this.load();
+    });
   }
 
   /*

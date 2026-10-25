@@ -160,7 +160,7 @@ with `{ from, to }` for an extension that keeps weights or sizes of its own.
 ```
 
 **4. Add a button under the countries**, such as "Add all countries where UPS ships". Fill `shipping-admin-country-actions`
-with an element that names its own slot and finds the screen with `closest()`:
+with an element that names its own slot and finds the shipping settings with `closest()`:
 
 ```html
 <k-ups-country-button slot="country-actions"></k-ups-country-button>
