@@ -1,6 +1,7 @@
 import ShadowComponent from '/kempo-ui/components/ShadowComponent.js';
 import { html, nothing } from '/kempo-ui/lit-all.min.js';
 import '/kempo-ui/components/Spinner.js';
+import '/kempo-ui/components/Table.js';
 import '/kempo-ui/components/Icon.js';
 import Toast from '/kempo-ui/components/Toast.js';
 import { getOrder, getRegions } from '/commerce/sdk.js';
@@ -160,16 +161,7 @@ export class OrderShipping extends ShadowComponent {
   renderItems(data){
     const units = data.units ?? { weight: '', dimension: '' };
     return html`
-      <table class="mb">
-        <thead><tr><th>Item</th><th>Quantity</th><th>Size needed (each)</th><th>Weight (each)</th><th>Own charge</th></tr></thead>
-        <tbody>${(data.lines ?? []).map(item => html`<tr>
-          <td>${item.name}</td>
-          <td>${item.quantity}</td>
-          <td>${this.size(item, units.dimension)}</td>
-          <td>${this.weight(item, units.weight)}</td>
-          <td>${item.rate === null || item.rate === undefined ? html`<span class="tc-muted">Store rate</span>` : this.money(item.rate)}</td>
-        </tr>`)}</tbody>
-      </table>
+      <k-table .records=${data.lines ?? []} .fields=${[{ name: 'name', label: 'Item', editable: false }, { name: 'quantity', label: 'Quantity', size: 110, editable: false }, { name: 'size', label: 'Size needed (each)', size: 220, editable: false, calculator: item => item.length && item.width && item.height ? `${item.length} × ${item.width} × ${item.height} ${units.dimension}` : 'Not set' }, { name: 'weight', label: 'Weight (each)', size: 160, editable: false, calculator: item => item.weight ? `${item.weight} ${units.weight}` : 'Not set' }, { name: 'rate', label: 'Own charge', size: 150, editable: false, calculator: item => item.rate === null || item.rate === undefined ? 'Store rate' : this.money(item.rate) }]}></k-table>
     `;
   }
 
@@ -178,17 +170,7 @@ export class OrderShipping extends ShadowComponent {
     if(!data.shipments?.length) return nothing;
     return html`
       <h3 class="h6">Boxes</h3>
-      <table class="mb">
-        <thead><tr><th>Box</th><th>Inside size</th><th>Items</th><th>Weight</th><th>Sent by</th><th>Price</th></tr></thead>
-        <tbody>${data.shipments.map(box => html`<tr>
-          <td>${box.name || 'Unnamed box'}</td>
-          <td>${box.length} × ${box.width} × ${box.height} ${units.dimension}</td>
-          <td>${box.items}</td>
-          <td>${box.weight ? `${box.weight} ${units.weight}` : html`<span class="tc-muted">Not set</span>`}</td>
-          <td>${[box.carrier, box.service].filter(Boolean).join(' ') || 'Store rate'}</td>
-          <td>${this.money(box.price)}</td>
-        </tr>`)}</tbody>
-      </table>
+      <k-table .records=${data.shipments ?? []} .fields=${[{ name: 'name', label: 'Box', editable: false, calculator: box => box.name || 'Unnamed box' }, { name: 'inside', label: 'Inside size', size: 200, editable: false, calculator: box => `${box.length} × ${box.width} × ${box.height} ${units.dimension}` }, { name: 'items', label: 'Items', size: 90, editable: false }, { name: 'weight', label: 'Weight', size: 150, editable: false, calculator: box => box.weight ? `${box.weight} ${units.weight}` : 'Not set' }, { name: 'sentBy', label: 'Sent by', size: 200, editable: false, calculator: box => [box.carrier, box.service].filter(Boolean).join(' ') || 'Store rate' }, { name: 'price', label: 'Price', size: 120, editable: false, calculator: box => this.money(box.price) }]}></k-table>
     `;
   }
 

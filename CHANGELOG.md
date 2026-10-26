@@ -37,3 +37,8 @@ All notable changes to `kempo-shipping` are documented in this file.
 - A **shipping address** on the checkout, as its own panel between billing and store credit. **Same as billing** is the default: the server copies the billing address when the order is placed.
 - **Shipping tax** from kempo-tax: the fee is marked taxable only where kempo-tax says shipping is taxed.
 - The address is checked at checkout and kept with the order as `order.data.shipping`.
+
+## [0.1.3] - 2026-10-26
+### Changed
+- The items and boxes on an order's shipping view are kempo-ui tables.
+- Requires kempo 4.9.7 (the admin lists use kempo-ui tables).
