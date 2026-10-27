@@ -3,12 +3,36 @@ locked: true
 -->
 <page title="Shipping - Admin">
 <content>
-  <script type="module" src="/admin/extension/kempo-shipping/components/ShippingSettings.js"></script>
+  <script type="module" src="/kempo-ui/components/Tabs.js"></script>
+  <script type="module" src="/admin/extension/kempo-shipping/components/ShippingGeneral.js"></script>
+  <script type="module" src="/admin/extension/kempo-shipping/components/ShippingUnits.js"></script>
+  <script type="module" src="/admin/extension/kempo-shipping/components/Boxes.js"></script>
+
   <h1>Shipping</h1>
-  <k-shipping-settings>
-    <location name="shipping-admin-tabs" />
-    <location name="shipping-admin-country-actions" />
-  </k-shipping-settings>
+
+  <div id="shipping">
+    <k-tabs active="general" hash-routing class="mb">
+      <k-tab for="general">General</k-tab>
+      <k-tab for="boxes">Boxes</k-tab>
+      <k-tab for="units">Units</k-tab>
+
+      <k-tab-content name="general" class="pt">
+        <k-shipping-general>
+          <location name="shipping-admin-country-actions" />
+        </k-shipping-general>
+      </k-tab-content>
+
+      <k-tab-content name="boxes" class="pt">
+        <k-shipping-boxes></k-shipping-boxes>
+      </k-tab-content>
+
+      <k-tab-content name="units" class="pt">
+        <k-shipping-units></k-shipping-units>
+      </k-tab-content>
+
+      <location name="shipping-admin-tabs" />
+    </k-tabs>
+  </div>
   <location name="shipping-admin-scripts" />
 </content>
 </page>

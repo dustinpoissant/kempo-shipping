@@ -8,16 +8,15 @@ import { WEIGHT_UNITS, DIMENSION_UNITS, convertWeight, convertLength } from './u
   saved (see convertProducts).
 */
 const OWNER = 'kempo-shipping';
-const TAB = 'shipping';
 const SPACE = 'The room the product needs inside a box, including any packing material. It is not the size of the box it ends up in.';
 
 export const shippingAttributes = ({ weightUnit, dimensionUnit }) => [
-  { key: 'shippingrate', label: 'Flat shipping charge (blank uses the store rate)', type: 'currency', tab: TAB },
-  { key: 'processingdays', label: 'Processing days', type: 'number', tab: TAB, description: 'How many days it takes you to make this and get it ready to ship. Blank ships the day it is ordered. Added to the shipping time to show the customer when it should arrive.' },
-  { key: 'weight', label: `Weight (${weightUnit})`, type: 'number', tab: TAB },
-  { key: 'length', label: `Length needed (${dimensionUnit})`, type: 'number', tab: TAB, description: SPACE },
-  { key: 'width', label: `Width needed (${dimensionUnit})`, type: 'number', tab: TAB, description: SPACE },
-  { key: 'height', label: `Height needed (${dimensionUnit})`, type: 'number', tab: TAB, description: SPACE },
+  { key: 'shippingrate', label: 'Flat shipping charge (blank uses the store rate)', type: 'currency' },
+  { key: 'processingdays', label: 'Processing days', type: 'number', description: 'How many days it takes you to make this and get it ready to ship. Blank ships the day it is ordered. Added to the shipping time to show the customer when it should arrive.' },
+  { key: 'weight', label: `Weight (${weightUnit})`, type: 'number' },
+  { key: 'length', label: `Length needed (${dimensionUnit})`, type: 'number', description: SPACE },
+  { key: 'width', label: `Width needed (${dimensionUnit})`, type: 'number', description: SPACE },
+  { key: 'height', label: `Height needed (${dimensionUnit})`, type: 'number', description: SPACE },
 ];
 
 export const registerShippingAttributes = async units => {

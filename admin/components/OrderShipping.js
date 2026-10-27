@@ -13,7 +13,7 @@ import { countryOptions } from '/commerce/utils/regions.js';
 
     <k-shipping-order></k-shipping-order>
 
-  It is the content of a `k-commerce-order-tab` that admin/order-tab.global.html puts on the page, and shows where the order is
+  It is the content of a tab that admin/order-tab.global.html adds to the order page's `commerce-admin-order-tabs` location, and shows where the order is
   going (staff can edit the address), the method the customer chose and when it was estimated to arrive, the size and weight of
   each item that was sent, the boxes the order was packed into and how each was priced, and what was charged. All of that except
   the address was kept with the order's shipping fee when it was placed, in the units the store had then, so a later change of
@@ -46,6 +46,7 @@ export class OrderShipping extends ShadowComponent {
 
   connectedCallback(){
     super.connectedCallback();
+    this.closest('#order')?.addEventListener('orderChanged', this.load);
     this.load();
   }
 

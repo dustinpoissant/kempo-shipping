@@ -1,39 +1,28 @@
 import ShadowComponent from '/kempo-ui/components/ShadowComponent.js';
 import { html, nothing } from '/kempo-ui/lit-all.min.js';
-import '/kempo-ui/components/Tabs.js';
 import '/kempo-ui/components/Tags.js';
 import '/kempo-ui/components/Spinner.js';
 import '/kempo-ui/components/Toggle.js';
 import '/kempo-ui/components/Time.js';
 import Toast from '/kempo-ui/components/Toast.js';
-import '/admin/extension/kempo-shipping/components/Boxes.js';
 import { countryOptions } from '/commerce/utils/regions.js';
 
 /*
-  The shipping settings, served at /admin/extension/kempo-shipping/components/ShippingSettings.js, in tabs:
-  General (the flat rate, the countries physical items ship to, how processing time is counted, and the address orders are
-  sent from, which carriers need to quote a rate), Boxes (see Boxes.js) and Units. A product sets its own flat charge, weight and size in the Shipping tab
-  of its product form.
+  The General tab of the shipping settings, served at /admin/extension/kempo-shipping/components/ShippingGeneral.js: the flat rate, the
+  countries physical items ship to, how processing time is counted, and the address orders are sent from. It saves its own fields with
+  its own button.
 
-  The saved Ship From address is a public property, `origin`, and an `origin-change` event fires on this element when it
-  loads and when it is saved. A carrier tab reads and listens to it (it finds this component with closest()) to keep its Test
-  button off until the address it needs is filled in.
+  The saved Ship From address is announced as an `origin-change` event (detail: the address), which bubbles from this element to the
+  shipping page's `#shipping` wrapper. Carrier tabs listen there to keep their Test buttons off until the address they need is filled in.
 
-  A carrier extension adds a tab by filling the `shipping-admin-tabs` location with an element that names the tab:
-
-    <k-shipping-tab name="table" label="Table Rates"> ...anything... </k-shipping-tab>
-
-  It can also add a button under the countries by filling `shipping-admin-country-actions` with an element that names
-  its own slot. It finds this component with closest() and calls `addCountries(['MX', 'CA'])`:
+  Other extensions can add a button under the countries: fill the `shipping-admin-country-actions` location, inside this element,
+  with an element that names its own slot, and call `addCountries(['MX', 'CA'])` on this element (found with closest()):
 
     <k-ups-country-button slot="country-actions"></k-ups-country-button>
 */
-const WEIGHT_UNITS = [['lb', 'Pounds (lb)'], ['oz', 'Ounces (oz)'], ['kg', 'Kilograms (kg)'], ['g', 'Grams (g)']];
-const DIMENSION_UNITS = [['in', 'Inches (in)'], ['cm', 'Centimetres (cm)']];
 const ORIGIN_FIELDS = [['name', 'Name or business', 'text'], ['phone', 'Phone', 'tel'], ['line1', 'Address', 'text'], ['line2', 'Apartment, suite, etc.', 'text'], ['city', 'City', 'text'], ['state', 'State or province', 'text'], ['postalCode', 'Postal code', 'text']];
-const TAG = 'k-shipping-settings';
 
-export class ShippingSettings extends ShadowComponent {
+export default class ShippingGeneral extends ShadowComponent {
   static properties = {
     rate: { state: true },
     flatRateEnabled: { state: true },
@@ -46,10 +35,6 @@ export class ShippingSettings extends ShadowComponent {
     error: { state: true },
     loading: { state: true },
     saving: { state: true },
-    weightUnit: { state: true },
-    dimensionUnit: { state: true },
-    carrierTabs: { state: true },
-    changingUnit: { state: true },
   };
 
   constructor(){
@@ -65,21 +50,16 @@ export class ShippingSettings extends ShadowComponent {
     this.error = '';
     this.loading = true;
     this.saving = false;
-    this.weightUnit = 'lb';
-    this.dimensionUnit = 'in';
-    this.carrierTabs = [];
-    this.changingUnit = false;
   }
 
   connectedCallback(){
     super.connectedCallback();
-    this.carrierTabs = [...this.querySelectorAll(':scope > k-shipping-tab')].map($tab => {
-      const name = $tab.getAttribute('name') || $tab.getAttribute('label') || 'tab';
-      $tab.slot = `tab-${name}`;
-      $tab.style.display = 'block';
-      return { name, label: $tab.getAttribute('label') || name };
+    const pane = this.closest('k-tab-content');
+    // Loads when its tab is first shown, so a tab nobody opens makes no requests.
+    if(!pane || pane.active) this.load();
+    else this.closest('k-tabs')?.addEventListener('tabfirstshown', ({ detail }) => {
+      if(detail.tab === pane.name) this.load();
     });
-    this.load();
   }
 
   /*
@@ -102,8 +82,6 @@ export class ShippingSettings extends ShadowComponent {
       this.origin = settings.origin ?? {};
       this.processing = settings.processing ?? this.processing;
       this.announceOrigin();
-      this.weightUnit = settings.weightUnit;
-      this.dimensionUnit = settings.dimensionUnit;
     } catch {
       this.error = 'The shipping settings could not be loaded.';
     }
@@ -145,40 +123,12 @@ export class ShippingSettings extends ShadowComponent {
 
   /* Tells the carrier tabs where orders are sent from, as saved, so they can say when it is missing. */
   announceOrigin = () => {
-    this.dispatchEvent(new CustomEvent('origin-change', { detail: this.origin }));
+    this.dispatchEvent(new CustomEvent('origin-change', { bubbles: true, detail: this.origin }));
   };
 
   /*
     Event handlers
   */
-
-  /*
-    A unit is a single choice, so it saves as soon as it is picked, on its own. Changing it converts the weights and
-    sizes saved on products and on carrier extensions' tables, so the select waits until that is done, and goes back to
-    the old unit if it fails.
-  */
-  changeUnit = async (key, event) => {
-    const select = event.target;
-    const previous = this[key];
-    const next = select.value;
-    if(next === previous) return;
-    this.changingUnit = true;
-    const response = await fetch('/shipping/api/settings', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'same-origin',
-      body: JSON.stringify({ [key]: next }),
-    });
-    const body = await response.json().catch(() => ({}));
-    this.changingUnit = false;
-    if(!response.ok){
-      select.value = previous;
-      Toast.error(body.error || 'The unit could not be changed.');
-      return;
-    }
-    this[key] = body[key];
-    Toast.success('Unit changed. The weights and sizes already saved were converted.');
-  };
 
   /* The tags hold country names; the setting holds codes. */
   chooseCountries = event => {
@@ -263,53 +213,25 @@ export class ShippingSettings extends ShadowComponent {
     `;
   }
 
-  // The tab event stays inside this component's shadow root, so each carrier tab is told when it is opened.
-  showTab = ({ detail }) => {
-    const $tab = [...this.querySelectorAll(':scope > k-shipping-tab')].find($element => $element.getAttribute('name') === detail.tab);
-    $tab?.dispatchEvent(new CustomEvent('shown'));
-  };
-
   render(){
     if(this.loading) return html`<k-spinner></k-spinner>`;
     return html`
       ${this.error ? html`<p class="tc-danger" role="alert">${this.error}</p>` : nothing}
 
-      <k-tabs class="mb" @tab=${this.showTab}>
-        <k-tab for="general">General</k-tab>
-        <k-tab for="boxes">Boxes</k-tab>
-        <k-tab for="units">Units</k-tab>
-        ${this.carrierTabs.map(tab => html`<k-tab for=${tab.name}>${tab.label}</k-tab>`)}
-        <k-tab-content name="general" class="pt">
-          ${this.renderFlatRate()}
+      ${this.renderFlatRate()}
 
-          <h2 class="h4">Where you ship physical items</h2>
-          <p class="tc-muted">Only these countries can be chosen as a shipping address for an order that needs sending. Anything else is refused at checkout. ${this.countries.length ? '' : 'None chosen yet, so physical items cannot be ordered.'}</p>
-          <k-tags class="d-b mb" .allowedTags=${[...this.names.values()].join(',')} .getSuggestions=${this.suggestCountries} .value=${this.countries.map(code => this.names.get(code)).filter(Boolean).join(',')} @change=${this.chooseCountries}></k-tags>
-          <p class="tc-muted">Type a country and press Enter or Tab to add it. Click a country to remove it.</p>
-          <div class="d-f mb"><slot name="country-actions"></slot></div>
+      <h2 class="h4">Where you ship physical items</h2>
+      <p class="tc-muted">Only these countries can be chosen as a shipping address for an order that needs sending. Anything else is refused at checkout. ${this.countries.length ? '' : 'None chosen yet, so physical items cannot be ordered.'}</p>
+      <k-tags class="d-b mb" .allowedTags=${[...this.names.values()].join(',')} .getSuggestions=${this.suggestCountries} .value=${this.countries.map(code => this.names.get(code)).filter(Boolean).join(',')} @change=${this.chooseCountries}></k-tags>
+      <p class="tc-muted">Type a country and press Enter or Tab to add it. Click a country to remove it.</p>
+      <div class="d-f mb"><slot name="country-actions"></slot></div>
 
-          ${this.renderProcessing()}
+      ${this.renderProcessing()}
 
-          ${this.renderOrigin()}
-          <button type="button" class="primary" ?disabled=${this.saving} @click=${this.save}>${this.saving ? 'Saving…' : 'Save shipping settings'}</button>
-        </k-tab-content>
-        <k-tab-content name="boxes" class="pt"><k-shipping-boxes></k-shipping-boxes></k-tab-content>
-        <k-tab-content name="units" class="pt">
-          <h2 class="h4">Units</h2>
-          <p class="tc-muted">The units product weights and sizes are measured in, and that carrier extensions price by. They save as soon as you pick one, and the weights and sizes already saved on products are converted.</p>
-          <label class="mb">
-            Weight
-            <select ?disabled=${this.changingUnit} @change=${event => this.changeUnit('weightUnit', event)}>${WEIGHT_UNITS.map(([code, label]) => html`<option value=${code} ?selected=${this.weightUnit === code}>${label}</option>`)}</select>
-          </label>
-          <label class="mb">
-            Length, width and height
-            <select ?disabled=${this.changingUnit} @change=${event => this.changeUnit('dimensionUnit', event)}>${DIMENSION_UNITS.map(([code, label]) => html`<option value=${code} ?selected=${this.dimensionUnit === code}>${label}</option>`)}</select>
-          </label>
-        </k-tab-content>
-        ${this.carrierTabs.map(tab => html`<k-tab-content name=${tab.name} class="pt"><slot name=${`tab-${tab.name}`}></slot></k-tab-content>`)}
-      </k-tabs>
+      ${this.renderOrigin()}
+      <button type="button" class="primary" ?disabled=${this.saving} @click=${this.save}>${this.saving ? 'Saving…' : 'Save shipping settings'}</button>
     `;
   }
 }
 
-customElements.define(TAG, ShippingSettings);
+customElements.define('k-shipping-general', ShippingGeneral);

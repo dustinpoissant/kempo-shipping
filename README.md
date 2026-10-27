@@ -152,22 +152,25 @@ Also exported: `getShippingSettings()` (flat rate, countries, units, `combine`, 
 `convertLength`. When the store's units change, kempo-shipping converts the boxes and fires `kempo-shipping:units_changed`
 with `{ from, to }` for an extension that keeps weights or sizes of its own.
 
-**3. Add a tab.** Fill the `shipping-admin-tabs` location with a `k-shipping-tab`, and load its script into
-`shipping-admin-scripts`, for the carrier's account settings:
+**3. Add a tab.** The shipping page's tabs are its own. Fill the `shipping-admin-tabs` location with a plain `k-tab` and
+`k-tab-content`, and load the carrier's script into `shipping-admin-scripts`, for the carrier's account settings:
 
 ```html
-<k-shipping-tab name="usps" label="USPS"><k-usps-settings></k-usps-settings></k-shipping-tab>
+<k-tab for="usps">USPS</k-tab><k-tab-content name="usps" class="pt"><k-usps-settings></k-usps-settings></k-tab-content>
 ```
 
+The carrier's component finds the page with `closest('#shipping')`, listens there for `origin-change` (the Ship From address,
+as saved), and reads the address itself when its tab is first shown.
+
 **4. Add a button under the countries**, such as "Add all countries where UPS ships". Fill `shipping-admin-country-actions`
-with an element that names its own slot and finds the shipping settings with `closest()`:
+with an element that names its own slot and finds the General tab with `closest()`:
 
 ```html
 <k-ups-country-button slot="country-actions"></k-ups-country-button>
 ```
 
 ```javascript
-this.closest('k-shipping-settings').addCountries(['CA', 'MX', 'GB']);
+this.closest('k-shipping-general').addCountries(['CA', 'MX', 'GB']);
 ```
 
 `addCountries(codes)` adds two-letter codes to the chosen countries, ignores anything that is not a country, and returns

@@ -6,6 +6,12 @@ All notable changes to `kempo-shipping` are documented in this file.
 
 ### Changed
 
+- **Shipping's product and template tabs** (`admin/product-tab.global.html`, `admin/template-tab.global.html`) show the shipping attributes on the product form and the template form, through the `products-admin-product-tabs` and `products-admin-template-tabs` locations. The attribute no longer has a `tab` value.
+
+- **Shipping settings are tabs on the page** (General, Boxes, Units, and each carrier), with hash routing. General has its own Save button, and Units saves as soon as a unit is picked. General is `k-shipping-general`, Units is `k-shipping-units`, and the old `k-shipping-settings` and `k-shipping-tab` elements are gone. A carrier adds its tab with a `k-tab` and `k-tab-content` in `shipping-admin-tabs`. The Ship From address goes out as `origin-change` on the `#shipping` wrapper, bubbling from General.
+
+- **Shipping settings tabs have hash routing**, so each tab (General, Boxes, Units and each carrier) has its own address.
+- **The Shipping order tab uses the order page's `commerce-admin-order-tabs` location as a plain tab** (`k-tab` and `k-tab-content`), in place of the `k-commerce-order-tab` element and its position. It now comes after History. `OrderShipping` reloads when the order changes.
 - **The order's Shipping section is now a tab** on the admin order page (`admin/order-tab.global.html`), and the order's shipping address can be edited there (`PUT /shipping/api/orders/:id/address`, `shipping:manage`). The tab also shows the method the customer chose and its estimated delivery.
 
 ### Added
