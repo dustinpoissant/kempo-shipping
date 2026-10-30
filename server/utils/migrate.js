@@ -9,15 +9,20 @@ import { getSetting, setSetting } from 'kempo/server/sdk.js';
   Every step is safe to run again.
 */
 const COLUMNS = [
-  sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "owner" text NOT NULL DEFAULT ''`,
-  sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "ref" text NOT NULL DEFAULT ''`,
-  sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "enabled" boolean NOT NULL DEFAULT true`,
-  sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "emptyWeight" double precision NOT NULL DEFAULT 0`,
-  sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "maxWeight" double precision`,
+  { name: 'owner', statement: sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "owner" text NOT NULL DEFAULT ''` },
+  { name: 'ref', statement: sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "ref" text NOT NULL DEFAULT ''` },
+  { name: 'enabled', statement: sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "enabled" boolean NOT NULL DEFAULT true` },
+  { name: 'emptyWeight', statement: sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "emptyWeight" double precision NOT NULL DEFAULT 0` },
+  { name: 'maxWeight', statement: sql`ALTER TABLE "kempoShippingBox" ADD COLUMN IF NOT EXISTS "maxWeight" double precision` },
 ];
 
+/* Only the columns that are missing are added: Postgres logs a notice for each `IF NOT EXISTS` that finds its column already there. */
 export const ensureBoxColumns = async () => {
-  for(const statement of COLUMNS) await db.execute(statement);
+  const existing = await db.execute(sql`SELECT column_name FROM information_schema.columns WHERE table_schema = current_schema() AND table_name = 'kempoShippingBox'`);
+  const present = new Set(existing.map(row => row.column_name));
+  for(const { name, statement } of COLUMNS){
+    if(!present.has(name)) await db.execute(statement);
+  }
 };
 
 export const absorbBoxesExtension = async () => {
